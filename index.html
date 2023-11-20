@@ -73,6 +73,29 @@
         };
       }
 
+      function handleInitialData() {
+        return (dispatch) => {
+          Promise.all([API.fetchTodos(), API.fetchGoals()]).then(
+            ([todos, goals]) => {
+              dispatch(receieveDataAction(todos, goals));
+            }
+          );
+        };
+      }
+
+      function handleAddTodo(name, callback) {
+        return (dispatch) => {
+          return API.saveTodo(name)
+            .then((todo) => {
+              dispatch(addTodoAction(todo));
+              callback();
+            })
+            .catch((err) => {
+              alert("An error occured saving a todo item. Please try again.");
+            });
+        };
+      }
+
       function handleDeleteTodo(todo) {
         return (dispatch) => {
           dispatch(removeTodoAction(todo.id));
@@ -83,6 +106,38 @@
           });
         };
       }
+
+      function handleToggle(id) {
+        return (dispatch) => {
+          dispatch(toggleTodoAction(id));
+          return API.saveTodoToggle(id).catch(() => {
+            alert("An error occured. Try again.");
+            dispatch(toggleTodoAction(id));
+          });
+        };
+      }
+
+      handleAddGoal = (name, callback) => {
+        return (dispatch) => {
+          return API.saveGoal(name)
+            .then((goal) => {
+              dispatch(addGoalAction(goal));
+              callback();
+            })
+            .catch(() => {
+              alert("Error creating a goal. Please try again");
+            });
+        };
+      };
+
+      handleDeleteGoal = (id, callback) => {
+        return (dispatch) => {
+          dispatch(removeGoalAction(id));
+          return API.deleteGoal(id).catch(() => {
+            alert("there was an error deleting this goal! try again");
+          });
+        };
+      };
 
       function todos(todoState = [], action) {
         switch (action.type) {
@@ -198,14 +253,11 @@
         const addItem = (e) => {
           e.preventDefault();
 
-          return API.saveTodo(todoInputRef.current.value)
-            .then((todo) => {
+          props.store.dispatch(
+            handleAddTodo(todoInputRef.current.value, () => {
               todoInputRef.current.value = "";
-              props.store.dispatch(addTodoAction(todo));
             })
-            .catch(() => {
-              alert("An error occured saving a todo item. Please try again.");
-            });
+          );
         };
 
         const removeItem = (todo) => {
@@ -213,12 +265,7 @@
         };
 
         const toggleItem = (id) => {
-          props.store.dispatch(toggleTodoAction(id));
-
-          return API.saveTodoToggle(id).catch(() => {
-            props.store.dispatch(toggleTodoAction(id));
-            alert("An error occured. Try again.");
-          });
+          props.store.dispatch(handleToggle(id));
         };
 
         return (
@@ -237,22 +284,19 @@
         const addGoal = (e) => {
           e.preventDefault();
 
-          return API.saveGoal(goalRef.current.value)
-            .then((goal) => {
+          props.store.dispatch(
+            handleAddGoal(goalRef.current.value, () => {
               goalRef.current.value = "";
-              props.store.dispatch(addGoalAction(goal));
             })
-            .catch(() => {
-              alert("Error creating a goal. Please try again");
-            });
+          );
         };
 
-        const removeItem = (goal) => {
-          props.store.dispatch(removeGoalAction(goal.id));
-          return API.deleteGoal(goal.id).catch(() => {
-            props.store.dispatch(addGoalAction(goal));
-            alert("An error occured. Try again.");
-          });
+        const removeGoal = (goal) => {
+          props.store.dispatch(
+            handleDeleteGoal(goal.id, () => {
+              props.store.dispatch(addGoalAction(goal));
+            })
+          );
         };
 
         return (
@@ -260,18 +304,14 @@
             <h1>Goal list</h1>
             <input type="text" placeholder="Add a goal" ref={goalRef} />
             <button onClick={addGoal}>Add goal</button>
-            <List items={props.goals} remove={removeItem} />
+            <List items={props.goals} remove={removeGoal} />
           </div>
         );
       };
 
       const App = (props) => {
         React.useEffect(() => {
-          Promise.all([API.fetchTodos(), API.fetchGoals()]).then(
-            ([todos, goals]) => {
-              props.store.dispatch(receieveDataAction(todos, goals));
-            }
-          );
+          props.store.dispatch(handleInitialData());
         }, []);
         // Dummy state - not the best but we learning and we doing this to force the rerender
         const [value, setValue] = React.useState(0);
