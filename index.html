@@ -311,48 +311,45 @@
 
       const Context = React.createContext();
 
-      const ConnectedGoals = () => {
-        return (
-          <Context.Consumer>
-            {(store) => {
-              const { goals } = store.getState();
+      // const ConnectedGoals = () => {
+      //   return (
+      //     <Context.Consumer>
+      //       {(store) => {
+      //         const { goals } = store.getState();
 
-              return <Goals goals={goals} dispatch={store.dispatch} />;
-            }}
-          </Context.Consumer>
-        );
-      };
+      //         return <Goals goals={goals} dispatch={store.dispatch} />;
+      //       }}
+      //     </Context.Consumer>
+      //   );
+      // };
 
-      const ConnectedTodos = () => {
-        return (
-          <Context.Consumer>
-            {(store) => {
-              const { todos } = store.getState();
+      const ConnectedGoals = connect((state) => ({
+        goals: state.goals,
+      }))(Goals);
 
-              return <ToDos todos={todos} dispatch={store.dispatch} />;
-            }}
-          </Context.Consumer>
-        );
-      };
+      // const ConnectedTodos = () => {
+      //   return (
+      //     <Context.Consumer>
+      //       {(store) => {
+      //         const { todos } = store.getState();
+
+      //         return <ToDos todos={todos} dispatch={store.dispatch} />;
+      //       }}
+      //     </Context.Consumer>
+      //   );
+      // };
+
+      const ConnectedTodos = ((state) => ({
+        todos: state.todos,
+      }))(ToDos);
 
       const App = (props) => {
         React.useEffect(() => {
-          props.store.dispatch(handleInitialData());
+          props.dispatch(handleInitialData());
         }, []);
-        // Dummy state - not the best but we learning and we doing this to force the rerender
-        const [value, setValue] = React.useState(0);
-
-        // In react we need to cause a rerender after the store is updated, above we manually reset the dom list items but react does this one its own, we just need to make it rerender
-        React.useEffect(() => {
-          props.store.subscribe(() => {
-            setValue((value) => value + 1);
-          });
-        }, []);
-
-        const { loading } = props.store.getState();
 
         {
-          if (loading === true) return <h3>Loading</h3>;
+          if (props.loading === true) return <h3>Loading</h3>;
         }
 
         return (
@@ -363,15 +360,9 @@
         );
       };
 
-      const ConnectedApp = () => {
-        return (
-          <Context.Consumer>
-            {(store) => {
-              return <App store={store} />;
-            }}
-          </Context.Consumer>
-        );
-      };
+      const ConnectedApp = connect((state) => ({
+        loading: state.loading,
+      }))(App);
 
       const Provider = (props) => {
         return (
