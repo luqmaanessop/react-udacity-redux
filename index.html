@@ -339,7 +339,7 @@
       //   );
       // };
 
-      const ConnectedTodos = ((state) => ({
+      const ConnectedTodos = connect((state) => ({
         todos: state.todos,
       }))(ToDos);
 
