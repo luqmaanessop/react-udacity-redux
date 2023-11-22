@@ -311,6 +311,48 @@
 
       const Context = React.createContext();
 
+      function connect(mapStateToProps) {
+        // returns the accepted in component - IE, the second parameter of the currying function
+        return (Component) => {
+          const Receiver = (props) => {
+            const [value, setValue] = React.useState(0);
+
+            React.useEffect(() => {
+              let unmounted = false;
+
+              const { subscribe } = props.store;
+
+              const unsubscribe = subscribe(() => {
+                {
+                  !unmounted && setValue((value) => value + 1);
+                }
+              });
+
+              return () => {
+                unsubscribe();
+                unmounted = true;
+              };
+            }, []);
+
+            const { dispatch, getState } = props.store;
+            const state = getState();
+            const stateNeeded = mapStateToProps(state);
+
+            return <Component {...stateNeeded} dispatch={dispatch} />;
+          };
+
+          const ConnectedComponent = () => {
+            return (
+              <Context.Consumer>
+                {(store) => <Receiver store={store} />}
+              </Context.Consumer>
+            );
+          };
+
+          return ConnectedComponent;
+        };
+      }
+
       // const ConnectedGoals = () => {
       //   return (
       //     <Context.Consumer>
