@@ -1,7 +1,7 @@
 import { RECIEVE_DATA } from '../actions/shared';
 import { ADD_GOAL, REMOVE_GOAL} from '../actions/goals';
 
-export function goals(goalState = [], action) {
+function goals(goalState = [], action) {
   switch (action.type) {
     case ADD_GOAL:
       return goalState.concat([action.goal]);
@@ -13,3 +13,5 @@ export function goals(goalState = [], action) {
       return goalState;
   }
 }
+
+export default goals;

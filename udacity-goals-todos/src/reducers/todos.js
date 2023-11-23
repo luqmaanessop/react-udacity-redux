@@ -1,7 +1,7 @@
 import { RECIEVE_DATA } from '../actions/shared';
 import {ADD_TODO, REMOVE_TODO, TOGGLE_TODO} from '../actions/todos';
 
-export function todos(todoState = [], action) {
+function todos(todoState = [], action) {
   switch (action.type) {
     case ADD_TODO:
       return todoState.concat([action.todo]);
@@ -19,3 +19,5 @@ export function todos(todoState = [], action) {
       return todoState;
   }
 }
+
+export default todos;

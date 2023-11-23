@@ -2,7 +2,7 @@ import {ADD_TODO} from '../actions/todos';
 import { ADD_GOAL } from '../actions/goals';
 
 // Use the better ES6 arrow functions, left the old version to see the comparison
-export const checker = (store) => (next) => (action) => {
+const checker = (store) => (next) => (action) => {
   // function checker(store) {
   // return function (next) {
   // return function (action) {
@@ -24,3 +24,5 @@ export const checker = (store) => (next) => (action) => {
   //   };
   // };
 };
+
+export default checker;
